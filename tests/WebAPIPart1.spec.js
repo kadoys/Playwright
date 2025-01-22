@@ -1,64 +1,49 @@
 const {test, expect, request} = require('@playwright/test');
-const {APIUtils}= require('./utils/APIUtils')
+const {APiUtils} = require('./utils/APiUtils');
+const loginPayLoad = {userEmail:"anshika@gmail.com",userPassword:"Iamking@000"};
+const orderPayLoad = {orders:[{country:"Cuba",productOrderedId:"62023a7616fcf72fe9dfc619"}]};
+
+
 let response;
 test.beforeAll( async()=>
 {
-const apiContext = await request.newContext();
-const apiUtils =new APiUtils(apiContext,loginPayLoad);
-response = await apiUtils.createOrder(orderPayLoad);
-});
+   const apiContext = await request.newContext();
+   const apiUtils = new APiUtils(apiContext,loginPayLoad);
+   response =  await apiUtils.createOrder(orderPayLoad);
 
-test.beforeEach(()=>
+})
+
+
+//create order is success
+test('Place the order', async ({page})=>
 {
+    page.addInitScript(value => {
 
-
-});
-
-// test1, test2, test3
-
-
-
-
-
-
-
-test ('Place the order', async ({page})=>
-    {
- 
-      page.addInitScript(value =>{
-         window.localStorage.setItem('token', value);
-}, response.token );
-      
-      await page.goto("https://rahulshettyacademy.com/client/")
-
-
-await page.locator("button[routerlink*='myorders']").click();
-await page.locator("tbody").waitFor();
+        window.localStorage.setItem('token',value);
+    }, response.token );
+await page.goto("https://rahulshettyacademy.com/client/");
+ await page.locator("button[routerlink*='myorders']").click();
+ await page.locator("tbody").waitFor();
 const rows = await page.locator("tbody tr");
 
-for (let i =0; i< await rows.count(); i++)
+
+for(let i =0; i<await rows.count(); ++i)
 {
-
- const rowOrderId = rows.nth(i).locator("th").textContent();
- if (response.orderId.includes(rowOrderId))
- {
-  await rows.nth(i),locator("button").first().click();
-  break;
- }
+   const rowOrderId =await rows.nth(i).locator("th").textContent();
+   if (response.orderId.includes(rowOrderId))
+   {
+       await rows.nth(i).locator("button").first().click();
+       break;
+   }
 }
-const OrderIdDetails = await page.locator(".col-text").textContent();
-await page.pause();
+const orderIdDetails =await page.locator(".col-text").textContent();
+//await page.pause();
 expect(response.orderId.includes(orderIdDetails)).toBeTruthy();
-}
 
+});
 
-
-
-
-
-
-
-   //Zara Coat 4
+//Verify if order created is showing in history page
+// Precondition - create order -
    
    
    
@@ -69,4 +54,4 @@ expect(response.orderId.includes(orderIdDetails)).toBeTruthy();
    
    
    
-    );
+    
